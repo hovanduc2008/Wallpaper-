@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picture of the Day</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 10px 0;
+            transition: opacity 1s ease-in-out;
+        }
+        p {
+            font-size: 16px;
+            text-align: justify;
+        }
+        .loading {
+            font-size: 18px;
+            color: #f1c40f;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 Picture of the Day</h1>
+        <p id="loading" class="loading">Đang tải dữ liệu...</p>
+        <h2 id="title"></h2>
+        <img id="image" src="" alt="Picture of the Day" style="display: none; opacity: 0;">
+        <p id="explanation"></p>
+        <p id="date"></p>
+    </div>
+
+    <script>
+        const API_SOURCES = [
+            { name: "NASA", url: "https://api.nasa.gov/planetary/apod?api_key=NFa8eusGg5OuXVkhYUBmVwdEfcUVIfyxshyga9Ke", getData: (data) => ({ url: data.url, title: data.title, explanation: data.explanation, date: data.date }) },
+            // { name: "Bing", url: "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US", getData: (data) => ({ url: "https://www.bing.com" + data.images[0].url, title: "Bing Image of the Day", explanation: data.images[0].copyright, date: new Date().toISOString().split('T')[0] }) },
+            // { name: "Unsplash", url: "https://api.unsplash.com/photos/random?query=nature&client_id=YOUR_ACCESS_KEY", getData: (data) => ({ url: data.urls.full, title: data.alt_description || "Unsplash Random Photo", explanation: "Ảnh từ Unsplash", date: new Date().toISOString().split('T')[0] }) },
+            { name: "Pixabay", url: "https://pixabay.com/api/?key=49282641-b80fe10e559070dffbed9c46a&q=nature&image_type=photo", getData: (data) => ({ url: data.hits[0].largeImageURL, title: "Pixabay Photo", explanation: "Ảnh từ Pixabay", date: new Date().toISOString().split('T')[0] }) }
+        ];
+
+        let currentIndex = 0;
+
+        async function fetchImage() {
+            const api = API_SOURCES[currentIndex];
+            try {
+                const response = await fetch(api.url);
+                const data = await response.json();
+                const imageData = api.getData(data);
+                
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("title").innerText = imageData.title;
+                document.getElementById("image").src = imageData.url;
+                document.getElementById("image").style.display = "block";
+                document.getElementById("image").style.opacity = 1;
+                document.getElementById("explanation").innerText = imageData.explanation;
+                document.getElementById("date").innerText = "📅 Ngày: " + imageData.date;
+            } catch (error) {
+                document.getElementById("loading").innerText = "❌ Lỗi khi tải dữ liệu!";
+                document.getElementById("loading").classList.add("error");
+                console.error("Lỗi khi lấy dữ liệu:", error);
+            }
+            currentIndex = (currentIndex + 1) % API_SOURCES.length;
+        }
+        
+        fetchImage();
+        setInterval(fetchImage, 5000); // Chuyển ảnh sau mỗi 5 giây
+    </script>
+</body>
+</html>
