@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #f4f4f4;
+}
+
+#chat-container {
+    width: 300px;
+    text-align: center;
+}
+
+#messages {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#message-input {
+    width: 80%;
+    padding: 5px;
+}
+
+button {
+    padding: 5px;
+    margin-top: 5px;
+}
