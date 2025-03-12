@@ -51,6 +51,12 @@
         }
     </style>
 </head>
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <body>
     <div class="container-fluid">
         <div class="left" id="left">
@@ -62,7 +68,7 @@
         </div>
         <div class="right" id="right">
             <div class="nasa-info" id="nasa-info"></div>
-            <div class="nasa-info" id="nasa-info">
+            <div class="nasa-info" id="nasa-info google_translate_element">
                 <img src="./anh.gif" alt="">
             </div>
         </div>
@@ -104,6 +110,8 @@
         }
         
         async function setBackground() {
+            console.log("sad");
+            
             try {
                 const response = await fetch('https://api.nasa.gov/planetary/apod?api_key=LyAh0QmzWUr4OnNgZThEh8sTkguhrzeMNubYd3Su');
                 const data = await response.json();
@@ -163,7 +171,7 @@
             document.getElementById('date').textContent = now.toLocaleDateString('vi-VN', options);
         }
         
-        setBackground();
+        setInterval(setBackground(), 1000 * 60)
         fetchWeather();
         fetchLunarDate();
         setInterval(updateClock, 1000);
