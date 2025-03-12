@@ -1,24 +1,167 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat với Google Sheets</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Fake Desktop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: white;
+            transition: all 1s ease-in-out;
+        }
+        .container-fluid {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .left, .right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .info-box, .nasa-info {
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+        }
+    </style>
 </head>
 <body>
-    <div id="login-screen">
-        <h2>Đăng nhập</h2>
-        <input type="text" id="username" placeholder="Nhập tên của bạn">
-        <button onclick="login()">Vào phòng chat</button>
+    <div class="container-fluid">
+        <div class="left" id="left">
+            <div class="info-box" id="clock"></div>
+            <div class="info-box" id="date"></div>
+            <div class="info-box" id="lunar-date"></div>
+            <div class="info-box" id="weather"></div>
+            <div class="info-box" id="countdown"></div>
+        </div>
+        <div class="right" id="right">
+            <div class="nasa-info" id="nasa-info"></div>
+        </div>
     </div>
+    <script>
+        let nextEventDate = new Date('2025-01-01T00:00:00');
+        let nextEventName = "Sự kiện gần nhất";
+        
+        async function fetchNextEvent() {
+            try {
+                const year = new Date().getFullYear();
+                const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/VN`);
+                const events = await response.json();
+                if (events.length > 0) {
+                    const now = new Date();
+                    const upcomingEvents = events.filter(event => new Date(event.date) > now);
+                    if (upcomingEvents.length > 0) {
+                        nextEventDate = new Date(upcomingEvents[0].date);
+                        nextEventName = upcomingEvents[0].localName;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+            }
+        }
+        
+        function countdownToEvent() {
+            const now = new Date();
+            const diff = nextEventDate - now;
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+                document.getElementById('countdown').innerHTML = `${nextEventName}<br>${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
+            } else {
+                document.getElementById('countdown').textContent = 'Sự kiện đã diễn ra!';
+            }
+        }
+        
+        async function setBackground() {
+            try {
+                const response = await fetch('https://api.nasa.gov/planetary/apod?api_key=LyAh0QmzWUr4OnNgZThEh8sTkguhrzeMNubYd3Su');
+                const data = await response.json();
+                if (data.hdurl) {
+                    document.body.style.backgroundImage = `url('${data.hdurl}')`;
+                }
+                document.getElementById('nasa-info').innerHTML = `<strong>${data.title}</strong><br>${data.explanation}`;
+            } catch (error) {
+                console.error('Error fetching NASA image:', error);
+            }
+        }
+        
+        async function fetchWeather() {
+            try {
+                const response = await fetch('https://api.openweathermap.org/data/2.5/weather?q=Hanoi&appid=aca544b1e9f8d31d24d4ff4f38456c58&units=metric&lang=vi');
+                const data = await response.json();
+                document.getElementById('weather').textContent = `Thời tiết: ${data.weather[0].description}, ${data.main.temp}°C`;
+            } catch (error) {
+                console.error('Error fetching weather:', error);
+            }
+        }
+        
+        async function fetchLunarDate() {
+            try {
+                const today = new Date();
+                const response = await fetch('https://open.oapi.vn/date/convert-to-lunar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        day: today.getDate(),
+                        month: today.getMonth() + 1,
+                        year: today.getFullYear()
+                    })
+                });
+                const data = await response.json();
+                if (data.data) {
+                    document.getElementById('lunar-date').textContent = `Âm lịch: ${data.data.day}/${data.data.month}/${data.data.year}, ${data.data.sexagenaryCycle}`;
+                }
+            } catch (error) {
+                console.error('Error fetching lunar date:', error);
+            }
+        }
 
-    <div id="chat-container" style="display: none;">
-        <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Nhập tin nhắn">
-        <button onclick="sendMessage()">Gửi</button>
-    </div>
-
-    <script src="script.js"></script>
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('vi-VN', options);
+        }
+        
+        setBackground();
+        fetchWeather();
+        fetchLunarDate();
+        setInterval(updateClock, 1000);
+        updateClock();
+        updateDate();
+        fetchNextEvent().then(() => setInterval(countdownToEvent, 1000));
+    </script>
 </body>
 </html>

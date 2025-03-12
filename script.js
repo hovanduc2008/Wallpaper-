@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzKdYzjvGJGPVZ5FIaNQca-AjqHjVveXoahbxcoWzr-KBhCG4-XhVDse7uD6k7e_ptP/exec"; // Thay YOUR_GOOGLE_SCRIPT_URL bằng URL đã deploy
+const API_URL = "https://script.google.com/macros/s/AKfycbzKdYzjvGJGPVZ5FIaNQca-AjqHjVveXoahbxcoWzr-KBhCG4-XhVDse7uD6k7e_ptP/exec"
 
 let username = "";
 
